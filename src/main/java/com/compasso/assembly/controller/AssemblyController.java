@@ -29,35 +29,33 @@ public class AssemblyController {
 		this.repository = repository;
 	}
 
-	
-	 @RequestMapping(value = "", method = RequestMethod.GET)
-	 public Resources<Resource<Assembly>> getOnlyEnable() { 
-		 List<Resource<Assembly>> assemblies = repository.findAll().stream()
-					.map(assembly -> new Resource<>(assembly,
-							ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(AssemblyController.class)
-									.getAssemblyById(assembly.getId())).withSelfRel(),
-							ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(AssemblyController.class).getAll())
-									.withRel("assemblies")))
-					.collect(Collectors.toList());
+	@RequestMapping(value = "", method = RequestMethod.GET)
+	public Resources<Resource<Assembly>> getOnlyEnable() {
+		List<Resource<Assembly>> assemblies = repository.findAll().stream()
+				.map(assembly -> new Resource<>(assembly,
+						ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(AssemblyController.class)
+								.getAssemblyById(assembly.getId())).withSelfRel(),
+						ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(AssemblyController.class).getAll())
+								.withRel("assemblies")))
+				.collect(Collectors.toList());
 
-			return new Resources<>(assemblies, ControllerLinkBuilder
-					.linkTo(ControllerLinkBuilder.methodOn(AssemblyController.class).getAll()).withSelfRel());
-	 }
-	
-	 @RequestMapping(value = "", method = RequestMethod.GET) 
-	 public Resources<Resource<Assembly>> getOnlyDisable() { 
-		 List<Resource<Assembly>> assemblies = repository.findAll().stream()
-					.map(assembly -> new Resource<>(assembly,
-							ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(AssemblyController.class)
-									.getAssemblyById(assembly.getId())).withSelfRel(),
-							ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(AssemblyController.class).getAll())
-									.withRel("assemblies")))
-					.collect(Collectors.toList());
+		return new Resources<>(assemblies, ControllerLinkBuilder
+				.linkTo(ControllerLinkBuilder.methodOn(AssemblyController.class).getAll()).withSelfRel());
+	}
 
-			return new Resources<>(assemblies, ControllerLinkBuilder
-					.linkTo(ControllerLinkBuilder.methodOn(AssemblyController.class).getAll()).withSelfRel());
-	 }
-	 
+	@RequestMapping(value = "", method = RequestMethod.GET)
+	public Resources<Resource<Assembly>> getOnlyDisable() {
+		List<Resource<Assembly>> assemblies = repository.findAll().stream()
+				.map(assembly -> new Resource<>(assembly,
+						ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(AssemblyController.class)
+								.getAssemblyById(assembly.getId())).withSelfRel(),
+						ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(AssemblyController.class).getAll())
+								.withRel("assemblies")))
+				.collect(Collectors.toList());
+
+		return new Resources<>(assemblies, ControllerLinkBuilder
+				.linkTo(ControllerLinkBuilder.methodOn(AssemblyController.class).getAll()).withSelfRel());
+	}
 
 	@RequestMapping(value = "", method = RequestMethod.GET)
 	public Resources<Resource<Assembly>> getAll() {
@@ -78,9 +76,10 @@ public class AssemblyController {
 
 		Assembly assembly = repository.findById(id).orElseThrow(() -> new RecordNotFoundException(id));
 
-		return new Resource<>(assembly, 
-				ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(AssemblyController.class).getAssemblyById(id)).withSelfRel(),
-				ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(AssemblyController.class).getAll()).withRel("assembly"));
+		return new Resource<>(assembly, ControllerLinkBuilder
+				.linkTo(ControllerLinkBuilder.methodOn(AssemblyController.class).getAssemblyById(id)).withSelfRel(),
+				ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(AssemblyController.class).getAll())
+						.withRel("assembly"));
 	}
 
 	@RequestMapping(value = "/{id}", method = RequestMethod.PUT)
@@ -88,38 +87,43 @@ public class AssemblyController {
 		Assembly newAssembly = new Assembly();
 		try {
 			newAssembly = repository.save(assembly);
-		}catch(Exception e) {
+		} catch (Exception e) {
 			throw new InternalServerErrorException(e.getMessage());
 		}
-		
-		return new Resource<>(assembly, 
-				ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(AssemblyController.class).getAssemblyById(newAssembly.getId())).withSelfRel(),
-				ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(AssemblyController.class).getAll()).withRel("assembly"));
+
+		return new Resource<>(assembly,
+				ControllerLinkBuilder.linkTo(
+						ControllerLinkBuilder.methodOn(AssemblyController.class).getAssemblyById(newAssembly.getId()))
+						.withSelfRel(),
+				ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(AssemblyController.class).getAll())
+						.withRel("assembly"));
 	}
 
-	
-	 @RequestMapping(value = "/", method = RequestMethod.POST) 
-	 public Resource<Assembly> createAssembly(@Valid @RequestBody Assembly assembly) {
+	@RequestMapping(value = "/", method = RequestMethod.POST)
+	public Resource<Assembly> createAssembly(@Valid @RequestBody Assembly assembly) {
 		Assembly newAssembly = new Assembly();
 		try {
 			newAssembly = repository.save(assembly);
-		}catch(Exception e) {
+		} catch (Exception e) {
 			throw new InternalServerErrorException(e.getMessage());
 		}
-		
-		return new Resource<>(assembly, 
-				ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(AssemblyController.class).getAssemblyById(newAssembly.getId())).withSelfRel(),
-				ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(AssemblyController.class).getAll()).withRel("assembly"));
-	 }
-	 
-	 @RequestMapping(value = "/{id}", method = RequestMethod.DELETE) 
-	 public void deleteAssembly(@PathVariable String id) {
-		 try {
-			 Assembly assemblyToDelete = repository.findById(id).get();
-			 repository.delete(assemblyToDelete); 
-		 }catch(Exception e) {
-			 throw new InternalServerErrorException(e.getMessage());
-		 }
-	 }
-	
+
+		return new Resource<>(assembly,
+				ControllerLinkBuilder.linkTo(
+						ControllerLinkBuilder.methodOn(AssemblyController.class).getAssemblyById(newAssembly.getId()))
+						.withSelfRel(),
+				ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(AssemblyController.class).getAll())
+						.withRel("assembly"));
+	}
+
+	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
+	public void deleteAssembly(@PathVariable String id) {
+		try {
+			Assembly assemblyToDelete = repository.findById(id).get();
+			repository.delete(assemblyToDelete);
+		} catch (Exception e) {
+			throw new InternalServerErrorException(e.getMessage());
+		}
+	}
+
 }
