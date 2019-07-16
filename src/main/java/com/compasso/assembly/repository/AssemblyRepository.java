@@ -1,10 +1,9 @@
 package com.compasso.assembly.repository;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.data.mongodb.repository.MongoRepository;
 
-@RestController
-@RequestMapping("/assembly")
-public class AssemblyRepository {
+import com.compasso.assembly.model.Assembly;
+
+public interface AssemblyRepository extends MongoRepository<Assembly, String>{
 
 }

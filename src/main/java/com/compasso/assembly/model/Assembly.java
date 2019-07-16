@@ -9,16 +9,10 @@ package com.compasso.assembly.model;
 
 import java.util.Collection;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 
-@NoArgsConstructor
-@AllArgsConstructor
-@Getter
-@Setter
+@Data
 @Builder
 public class Assembly extends AbstractObject {
 	
