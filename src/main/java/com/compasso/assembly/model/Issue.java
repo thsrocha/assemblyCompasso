@@ -22,5 +22,6 @@ public class Issue extends AbstractObject{
 	private Person owner;
 	private Collection<Person> votes;
 	private Integer duration;
+	private Boolean status;
 
 }

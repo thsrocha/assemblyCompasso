@@ -9,6 +9,8 @@ package com.compasso.assembly.model;
 
 import java.util.Collection;
 
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,6 +20,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Document
 public class Assembly extends AbstractObject {
 	
 	private static final long serialVersionUID = 523637575479981278L;

@@ -1,4 +1,4 @@
-package com.compasso.assembly.model;
+package com.compasso.assembly.enums;
 
 /**
  * Enumn to represent all status an object can be.

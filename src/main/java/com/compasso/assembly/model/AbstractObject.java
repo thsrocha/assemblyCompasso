@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 
 import org.springframework.data.annotation.Id;
 
+import com.compasso.assembly.enums.StatusObject;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
