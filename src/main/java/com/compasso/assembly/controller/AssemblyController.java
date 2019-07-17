@@ -11,6 +11,7 @@ import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,10 +19,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.compasso.assembly.exception.BadRequestException;
 import com.compasso.assembly.exception.InternalServerErrorException;
 import com.compasso.assembly.exception.RecordNotFoundException;
 import com.compasso.assembly.model.Assembly;
-import com.compasso.assembly.repository.AssemblyRepository;
+import com.compasso.assembly.service.AssemblyService;
 
 @RestController
 @RequestMapping("/assembly")
@@ -78,7 +80,14 @@ public class AssemblyController {
 	@GetMapping(value = "/{id}")
 	public ResponseEntity<Resource<Assembly>> getAssemblyById(@PathVariable("id") String id) {
 
-		Assembly assembly = service.findById(id).orElseThrow(() -> new RecordNotFoundException(id));
+		if(StringUtils.isEmpty(id)) {
+			throw new BadRequestException(HttpStatus.BAD_REQUEST.toString());
+		}
+		
+		Assembly assembly = service.findById(id);
+		if(StringUtils.isEmpty(assembly.getId())) {
+			throw new RecordNotFoundException(HttpStatus.NOT_FOUND.toString());
+		}
 
 		return new ResponseEntity<>(
 				new Resource<>(assembly, 
@@ -88,17 +97,27 @@ public class AssemblyController {
 	}
 
 	@RequestMapping(value = "/{id}", method = RequestMethod.PUT)
-	public ResponseEntity<Resource<Assembly>> modifyAssemblyById(@PathVariable("id") String id, @Valid @RequestBody Assembly assembly) {
-		Assembly newAssembly = new Assembly();
-		try {
-			newAssembly = service.save(assembly);
-		} catch (Exception e) {
-			throw new InternalServerErrorException(e.getMessage());
+	public ResponseEntity<Resource<Assembly>> update(@PathVariable("id") String id, @Valid @RequestBody Assembly assemblyToUpdate) {
+		
+		if(StringUtils.isEmpty(id)) {
+			throw new BadRequestException(HttpStatus.BAD_REQUEST.toString());
 		}
-
+		
+		Assembly assembly = service.findById(id);
+		if(StringUtils.isEmpty(assembly.getId())) {
+			throw new RecordNotFoundException(HttpStatus.NOT_FOUND.toString());
+		}
+		
+		assemblyToUpdate.setId(assembly.getId());
+		try {
+			service.createOrUpdate(assemblyToUpdate);
+		}catch (Exception e) {
+			throw new InternalServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR.toString());
+		}
+		
 		return new ResponseEntity<>( 
 				new Resource<>(assembly,
-				ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(AssemblyController.class).getAssemblyById(newAssembly.getId())).withSelfRel(),
+				ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(AssemblyController.class).getAssemblyById(assemblyToUpdate.getId())).withSelfRel(),
 				ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(AssemblyController.class).getAll()).withRel("assembly")),
 				HttpStatus.CREATED);
 	}
@@ -107,7 +126,7 @@ public class AssemblyController {
 	public ResponseEntity<Resource<Assembly>> createAssembly(@Valid @RequestBody Assembly assembly) {
 		Assembly newAssembly = new Assembly();
 		try {
-			newAssembly = service.save(assembly);
+			newAssembly = service.createOrUpdate(assembly);
 		} catch (Exception e) {
 			throw new InternalServerErrorException(e.getMessage());
 		}
@@ -120,12 +139,15 @@ public class AssemblyController {
 
 	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
 	public void deleteAssembly(@PathVariable String id) {
-		try {
-			Assembly assemblyToDelete = service.findById(id).get();
-			service.delete(assemblyToDelete);
-		} catch (Exception e) {
-			throw new InternalServerErrorException(e.getMessage());
+		if(StringUtils.isEmpty(id)) {
+			throw new BadRequestException(HttpStatus.BAD_REQUEST.toString());
 		}
+		
+		Assembly assembly = service.findById(id);
+		if(StringUtils.isEmpty(assembly.getId())) {
+			throw new RecordNotFoundException(HttpStatus.NOT_FOUND.toString());
+		}
+		
 	}
 
 }
