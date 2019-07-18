@@ -12,15 +12,17 @@ import java.util.Collection;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
-@Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Document
+@Getter
+@Setter
+@SuperBuilder
 public class Assembly extends AbstractObject {
 	
 	private static final long serialVersionUID = 523637575479981278L;

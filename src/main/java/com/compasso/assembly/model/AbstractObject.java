@@ -8,12 +8,16 @@ import org.springframework.data.annotation.Id;
 import com.compasso.assembly.enums.StatusObject;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
+@SuperBuilder
+@Getter
+@Setter
 public class AbstractObject implements Serializable{
 	
 	private static final long serialVersionUID = 7480127956321058193L;

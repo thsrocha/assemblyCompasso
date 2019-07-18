@@ -137,7 +137,7 @@ public class AssemblyController {
 		return new ResponseEntity<>(new Resource<>(assembly,
 				ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(AssemblyController.class).getAssemblyById(newAssembly.getId())).withSelfRel(),
 				ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(AssemblyController.class).getAll()).withRel("assembly")),
-				HttpStatus.OK);
+				HttpStatus.CREATED);
 	}
 	
 	@PostMapping(value = "/vote")
