@@ -10,6 +10,7 @@ import com.compasso.assembly.model.Assembly;
 @Repository
 public interface AssemblyRepository extends MongoRepository<Assembly, String>{
 	
-	Collection<Assembly> findByIssueStatusIs(Boolean status);
+	Collection<Assembly> findByIssuesActiveIs(Boolean status);
+	Assembly findByIssuesOwnerCpfIsAndIssuesDescriptionIs(String cpf, String description);
 
 }

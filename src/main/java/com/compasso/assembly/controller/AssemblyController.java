@@ -12,17 +12,20 @@ import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.compasso.assembly.exception.BadRequestException;
 import com.compasso.assembly.exception.InternalServerErrorException;
 import com.compasso.assembly.exception.RecordNotFoundException;
 import com.compasso.assembly.model.Assembly;
+import com.compasso.assembly.model.request.VoteRequest;
 import com.compasso.assembly.service.AssemblyService;
 
 @RestController
@@ -96,7 +99,7 @@ public class AssemblyController {
 				HttpStatus.OK); 
 	}
 
-	@RequestMapping(value = "/{id}", method = RequestMethod.PUT)
+	@PutMapping(value = "/{id}")
 	public ResponseEntity<Resource<Assembly>> update(@PathVariable("id") String id, @Valid @RequestBody Assembly assemblyToUpdate) {
 		
 		if(StringUtils.isEmpty(id)) {
@@ -122,7 +125,7 @@ public class AssemblyController {
 				HttpStatus.CREATED);
 	}
 
-	@RequestMapping(value = "/", method = RequestMethod.POST)
+	@PostMapping(value = "/")
 	public ResponseEntity<Resource<Assembly>> createAssembly(@Valid @RequestBody Assembly assembly) {
 		Assembly newAssembly = new Assembly();
 		try {
@@ -136,8 +139,16 @@ public class AssemblyController {
 				ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(AssemblyController.class).getAll()).withRel("assembly")),
 				HttpStatus.OK);
 	}
+	
+	@PostMapping(value = "/vote")
+	public ResponseEntity<Resource<Boolean>> vote(@Valid @RequestBody VoteRequest voteRequest) {
+		Boolean votedOrNot = service.vote(voteRequest.getIssueOwnerCpf(), voteRequest.getIssueDescription(), voteRequest.getPersonWhoWantToVote());
 
-	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
+		return new ResponseEntity<>(new Resource<>(votedOrNot),	HttpStatus.OK);
+		
+	}
+
+	@DeleteMapping(value = "/{id}")
 	public void deleteAssembly(@PathVariable String id) {
 		if(StringUtils.isEmpty(id)) {
 			throw new BadRequestException(HttpStatus.BAD_REQUEST.toString());
@@ -148,6 +159,7 @@ public class AssemblyController {
 			throw new RecordNotFoundException(HttpStatus.NOT_FOUND.toString());
 		}
 		
+		service.delete(assembly);
 	}
 
 }
