@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import com.compasso.assembly.exception.RecordNotFoundException;
 import com.compasso.assembly.model.Assembly;
 import com.compasso.assembly.model.Issue;
 import com.compasso.assembly.model.Person;
@@ -22,7 +23,7 @@ public class AssemblyService {
 	 }
 	 
 	 public Assembly findById(String id) {
-		 return assemblyRepository.findById(id).get();
+		 return assemblyRepository.findById(id).orElseThrow(() -> new RecordNotFoundException(id));
 	 }
 	 
 	public Assembly createOrUpdate(Assembly assemblyToCreateOrUpdate) {

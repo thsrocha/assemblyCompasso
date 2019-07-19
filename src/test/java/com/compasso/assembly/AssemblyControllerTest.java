@@ -14,6 +14,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -46,6 +48,8 @@ public class AssemblyControllerTest {
 	private RestTemplate restTemplate;
 	
 	private final static String anyAttribute = "any_attribute";
+	
+	private final static String emptyString = " ";
 	
 	private Assembly createSimpleAssembly() {
 		return Assembly.builder().
@@ -88,6 +92,32 @@ public class AssemblyControllerTest {
 		build();
 	}
 
+	
+	@Test
+	public void getOne() throws Exception {
+		final Assembly entity = createSimpleAssembly();
+		assemblyService.createOrUpdate(entity);
+		final ResponseEntity<Assembly> response = testRestTemplate.exchange("/assembly/{id}", HttpMethod.GET, null, Assembly.class, entity.getId());
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(response.getBody()).isNotNull();
+		assertThat(response.getBody().getId()).isEqualTo(entity.getId());
+	}
+	
+	@Test
+	public void getOneNotfound() throws Exception {
+		final Assembly entity = createSimpleAssembly();
+		assemblyService.createOrUpdate(entity);
+		final ResponseEntity<Assembly> response = testRestTemplate.exchange("/assembly/{id}", HttpMethod.GET, null, Assembly.class, UUID.randomUUID().toString());
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+	}
+	
+	@Test
+	public void getOneIdNull() throws Exception {
+		final Assembly entity = createSimpleAssembly();
+		assemblyService.createOrUpdate(entity);
+		final ResponseEntity<Assembly> response = testRestTemplate.exchange("/assembly/{id}", HttpMethod.GET, null, Assembly.class, emptyString);
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+	}
 
 	@Test
 	public void create() throws Exception {
@@ -103,15 +133,89 @@ public class AssemblyControllerTest {
 	public void createWithInvalidEntity() throws Exception {
 		final int databaseSizeBeforeCreate = assemblyRepository.findAll().size();
 		final Assembly entity = createSimpleAssembly();
-		
 		JsonNode jsonNode = new ObjectMapper().valueToTree(entity);
-		
 		((ObjectNode)jsonNode).put(anyAttribute, "any_value");
-		
 		final ResponseEntity<Assembly> response = testRestTemplate.postForEntity("/assembly/", jsonNode, Assembly.class);
-		
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
 		assertThat(assemblyRepository.findAll().size()).isEqualTo(databaseSizeBeforeCreate);
 	}
+	
+	@Test
+	public void update() throws Exception {
+		final Assembly entity = createSimpleAssembly();
+		final Person ownerUpdated = createSimpleOwner();
+		assemblyService.createOrUpdate(entity);
+		final int databaseSizeAfterCreate = assemblyRepository.findAll().size();
+		entity.setName("Thadeu");
+		entity.setOwner(ownerUpdated);
+		HttpEntity<Assembly> httpEntity = new HttpEntity<Assembly>(entity);
+		final ResponseEntity<Assembly> response = testRestTemplate.exchange("/assembly/{id}", HttpMethod.PUT, httpEntity, Assembly.class, entity.getId());
+		Assembly assembltAfterUpdate = assemblyService.findById(entity.getId());
+		assertThat(assembltAfterUpdate.getName()).isEqualTo("Thadeu");
+		assertThat(ownerUpdated).isEqualTo(ownerUpdated);
+		assertThat(response.getBody().getName()).isEqualTo(entity.getName());
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(assemblyRepository.findAll().size()).isEqualTo(databaseSizeAfterCreate);
+	}
+	
+	@Test
+	public void updateWithInvalidEntity() throws Exception {
+		final Assembly entity = createSimpleAssembly();
+		assemblyService.createOrUpdate(entity);
+		JsonNode jsonNode = new ObjectMapper().valueToTree(entity);
+		((ObjectNode)jsonNode).put(anyAttribute, "any_value");
+		HttpEntity<JsonNode> httpEntity = new HttpEntity<JsonNode>(jsonNode);
+		final ResponseEntity<Assembly> response = testRestTemplate.exchange("/assembly/{id}", HttpMethod.PUT, httpEntity, Assembly.class, entity.getId());
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+	}
+	
+	
+	@Test
+	public void updateWithInvalidEntityId() throws Exception {
+		final Assembly entity = createSimpleAssembly();
+		assemblyService.createOrUpdate(entity);
+		HttpEntity<Assembly> httpEntity = new HttpEntity<Assembly>(entity);
+		final ResponseEntity<Assembly> response = testRestTemplate.exchange("/assembly/{id}", HttpMethod.PUT, httpEntity, Assembly.class, UUID.randomUUID().toString());
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+	}
+	
+	@Test
+	public void updateWithInvalidEntityIdNull() throws Exception {
+		final Assembly entity = createSimpleAssembly();
+		assemblyService.createOrUpdate(entity);
+		HttpEntity<Assembly> httpEntity = new HttpEntity<Assembly>(entity);
+		final ResponseEntity<Assembly> response = testRestTemplate.exchange("/assembly/{id}", HttpMethod.PUT, httpEntity, Assembly.class, emptyString);
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+	}
+	
+	@Test
+	public void delete() throws Exception {
+		final Assembly entity = createSimpleAssembly();
+		final Assembly entity2 = createSimpleAssembly();
+		assemblyRepository.saveAll(Arrays.asList(entity, entity2));
+		final int databaseSizeAfterCreate = assemblyRepository.findAll().size();
+		final ResponseEntity<Assembly> response = testRestTemplate.exchange("/assembly/{id}", HttpMethod.DELETE, null, Assembly.class, entity.getId());
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(assemblyRepository.findAll().size()).isEqualTo(databaseSizeAfterCreate - 1);
+	}
+	
+	@Test
+	public void deleteNotFound() throws Exception {
+		final Assembly entity = createSimpleAssembly();
+		final Assembly entity2 = createSimpleAssembly();
+		assemblyRepository.saveAll(Arrays.asList(entity, entity2));
+		final ResponseEntity<Assembly> response = testRestTemplate.exchange("/assembly/{id}", HttpMethod.DELETE, null, Assembly.class, UUID.randomUUID().toString());
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+	}
+	
+	@Test
+	public void deleteBadRequest() throws Exception {
+		final Assembly entity = createSimpleAssembly();
+		final Assembly entity2 = createSimpleAssembly();
+		assemblyRepository.saveAll(Arrays.asList(entity, entity2));
+		final ResponseEntity<Assembly> response = testRestTemplate.exchange("/assembly/{id}", HttpMethod.DELETE, null, Assembly.class, UUID.randomUUID().toString());
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+	}
+	
 	
 }

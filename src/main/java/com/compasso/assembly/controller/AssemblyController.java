@@ -119,10 +119,10 @@ public class AssemblyController {
 		}
 		
 		return new ResponseEntity<>( 
-				new Resource<>(assembly,
+				new Resource<>(assemblyToUpdate,
 				ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(AssemblyController.class).getAssemblyById(assemblyToUpdate.getId())).withSelfRel(),
 				ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(AssemblyController.class).getAll()).withRel("assembly")),
-				HttpStatus.CREATED);
+				HttpStatus.OK);
 	}
 
 	@PostMapping(value = "/")
