@@ -3,6 +3,7 @@ package com.compasso.assembly;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.UUID;
@@ -13,6 +14,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -26,8 +28,11 @@ import com.compasso.assembly.service.AssemblyService;
 @SpringBootTest(classes = AssemblyApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT)
 public class AssemblyServiceTest {
 	
-	@Autowired
+	@MockBean
 	private AssemblyRepository assemblyRepository;
+	
+	@Autowired
+	private AssemblyRepository assemblyRepository2;
 
 	@Autowired
 	private AssemblyService assemblyService;
@@ -45,6 +50,7 @@ public class AssemblyServiceTest {
 	
 	private Collection<Issue> createListOfIssue() {
 		Issue issue = Issue.builder().
+		votes(new ArrayList<Person>()).
 		active(Boolean.TRUE).
 		description(UUID.randomUUID().toString()).
 		duration(180).
@@ -52,6 +58,7 @@ public class AssemblyServiceTest {
 		owner((createSimpleOwner())).build();
 		
 		Issue issue2 = Issue.builder().
+		votes(Arrays.asList(createSimpleOwner(), createSimpleOwner())).
 		active(Boolean.TRUE).
 		description(UUID.randomUUID().toString()).
 		duration(180).
@@ -59,6 +66,7 @@ public class AssemblyServiceTest {
 		owner((createSimpleOwner())).build();
 		
 		Issue issue3 = Issue.builder().
+		votes(Arrays.asList(createSimpleOwner(), createSimpleOwner())).
 		active(Boolean.TRUE).
 		description(UUID.randomUUID().toString()).
 		duration(180).
@@ -89,14 +97,16 @@ public class AssemblyServiceTest {
 	@Test
 	public void testIncorrectVote() {
 		Assembly assembly = createSimpleAssembly();
-		Issue issue = assembly.getIssues().iterator().next();
+		Issue issue = (Issue) assembly.getIssues().toArray()[1];
 		Mockito.when(assemblyRepository.findByIssuesOwnerCpfIsAndIssuesDescriptionIs(Mockito.anyString(), Mockito.anyString())).thenReturn(assembly);
-		Boolean returnedFromVote = assemblyService.vote(issue.getOwner().getCpf(), issue.getDescription(), createSimpleOwner());
-		assertThat(returnedFromVote).isEqualTo(Boolean.TRUE);
+		Boolean returnedFromVote = assemblyService.vote(issue.getOwner().getCpf(), issue.getDescription(), issue.getVotes().iterator().next());
+		assertThat(returnedFromVote).isEqualTo(Boolean.FALSE);
 	}
 	
 	@Test
 	public void testGetAllEnable() {
+		//Collection<Assembly> assemblyOnlyEnable
+		
 		
 	}
 	
