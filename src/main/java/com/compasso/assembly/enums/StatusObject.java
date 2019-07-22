@@ -9,6 +9,6 @@ package com.compasso.assembly.enums;
 public enum StatusObject {
 
 	
-	ACTIVE, DEACTIVATE, FINISH;
+	ACTIVE, DESACTIVATE, FINISH;
 	
 }

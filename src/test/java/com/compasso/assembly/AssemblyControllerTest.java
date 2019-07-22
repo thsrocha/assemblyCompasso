@@ -3,6 +3,8 @@ package com.compasso.assembly;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.UUID;
@@ -21,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.RestTemplate;
 
+import com.compasso.assembly.enums.StatusObject;
 import com.compasso.assembly.model.Assembly;
 import com.compasso.assembly.model.Issue;
 import com.compasso.assembly.model.Person;
@@ -53,6 +56,8 @@ public class AssemblyControllerTest {
 	
 	private Assembly createSimpleAssembly() {
 		return Assembly.builder().
+		createdAt(LocalDateTime.now()).
+		statusObject(StatusObject.ACTIVE).
 		name(UUID.randomUUID().toString()).
 		owner(createSimpleOwner()).
 		
@@ -61,21 +66,27 @@ public class AssemblyControllerTest {
 	
 	private Collection<Issue> createListOfIssue() {
 		Issue issue = Issue.builder().
-		active(Boolean.TRUE).
+		createdAt(LocalDateTime.now()).
+		statusObject(StatusObject.ACTIVE).
+		votes(new ArrayList<Person>()).
 		description(UUID.randomUUID().toString()).
 		duration(180).
 		goal(UUID.randomUUID().toString()).
 		owner((createSimpleOwner())).build();
 		
 		Issue issue2 = Issue.builder().
-		active(Boolean.TRUE).
+		createdAt(LocalDateTime.now()).
+		statusObject(StatusObject.ACTIVE).
+		votes(Arrays.asList(createSimpleOwner(), createSimpleOwner())).
 		description(UUID.randomUUID().toString()).
 		duration(180).
 		goal(UUID.randomUUID().toString()).
 		owner((createSimpleOwner())).build();
 		
 		Issue issue3 = Issue.builder().
-		active(Boolean.TRUE).
+		createdAt(LocalDateTime.now()).
+		statusObject(StatusObject.ACTIVE).
+		votes(Arrays.asList(createSimpleOwner(), createSimpleOwner())).
 		description(UUID.randomUUID().toString()).
 		duration(180).
 		goal(UUID.randomUUID().toString()).
@@ -86,6 +97,8 @@ public class AssemblyControllerTest {
 
 	private Person createSimpleOwner() {
 		return Person.builder().
+		createdAt(LocalDateTime.now()).
+		statusObject(StatusObject.ACTIVE).
 		birthday(LocalDate.now()).
 		cpf(UUID.randomUUID().toString()).
 		name(UUID.randomUUID().toString()).
@@ -216,6 +229,5 @@ public class AssemblyControllerTest {
 		final ResponseEntity<Assembly> response = testRestTemplate.exchange("/assembly/{id}", HttpMethod.DELETE, null, Assembly.class, UUID.randomUUID().toString());
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
 	}
-	
 	
 }

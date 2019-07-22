@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.compasso.assembly.enums.StatusObject;
 import com.compasso.assembly.exception.BadRequestException;
 import com.compasso.assembly.exception.InternalServerErrorException;
 import com.compasso.assembly.exception.RecordNotFoundException;
@@ -43,19 +44,8 @@ public class AssemblyController {
 		this.service = service;
 	}
 
-	@GetMapping(value = "/active")
-	public Resources<Resource<Assembly>> getOnlyEnable() {
-		List<Resource<Assembly>> assemblies = service.findAll().stream()
-				.map(assembly -> new Resource<>(assembly,
-						ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(AssemblyController.class).getAssemblyById(assembly.getId())).withSelfRel(),
-						ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(AssemblyController.class).getAll()).withRel("assemblies")))
-				.collect(Collectors.toList());
-
-		return new Resources<>(assemblies, ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(AssemblyController.class).getAll()).withSelfRel());
-	}
-
-	@GetMapping(value = "/desactive")
-	public Resources<Resource<Assembly>> getOnlyDisable() {
+	@GetMapping(value = "/status/{status}")
+	public Resources<Resource<Assembly>> getByStatus(@PathVariable("status") @Valid StatusObject status) {
 		List<Resource<Assembly>> assemblies = service.findAll().stream()
 				.map(assembly -> new Resource<>(assembly,
 						ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(AssemblyController.class).getAssemblyById(assembly.getId())).withSelfRel(),
