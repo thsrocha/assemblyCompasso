@@ -27,6 +27,7 @@ import com.compasso.assembly.exception.InternalServerErrorException;
 import com.compasso.assembly.exception.RecordNotFoundException;
 import com.compasso.assembly.model.Assembly;
 import com.compasso.assembly.model.Issue;
+import com.compasso.assembly.model.Person;
 import com.compasso.assembly.service.AssemblyService;
 
 @RestController
@@ -131,9 +132,18 @@ public class AssemblyController {
 	}
 	
 	@PostMapping(value = "/vote")
-	public ResponseEntity<Resource<Boolean>> vote(@RequestBody Assembly assembly) {
-		//Issue issue = assembly.getIssues().size();
-		Boolean votedOrNot = service.vote(voteRequest.getIssueOwnerCpf(), voteRequest.getIssueDescription(), voteRequest.getPersonWhoWantToVote());
+	public ResponseEntity<Resource<Boolean>> vote(@RequestBody Assembly assembly, @RequestBody Person personToVote) {
+		Issue issue = (Issue) assembly.getIssues().toArray()[0];
+		if(StringUtils.isEmpty(issue)) {
+			//TODO - criar msg 
+			throw new InternalServerErrorException("pensar");
+		}
+		if(StringUtils.isEmpty(issue.getOwner().getCpf()) || StringUtils.isEmpty(issue.getDescription()) || StringUtils.isEmpty(personToVote)) {
+			//TODO - criar msg 
+			throw new InternalServerErrorException("pensar");
+		}
+			
+		Boolean votedOrNot = service.vote(issue.getOwner().getCpf(), issue.getDescription(), personToVote);
 
 		return new ResponseEntity<>(new Resource<>(votedOrNot),	HttpStatus.OK);
 		

@@ -34,7 +34,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = AssemblyApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT)
+@SpringBootTest(classes = {AssemblyApplication.class, AssemblyControllerTest.class}, webEnvironment = WebEnvironment.RANDOM_PORT)
 public class AssemblyControllerTest {
 
 	
