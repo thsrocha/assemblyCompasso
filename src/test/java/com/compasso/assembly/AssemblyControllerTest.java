@@ -9,17 +9,24 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.UUID;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.hal.Jackson2HalModule;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.RestTemplate;
 
@@ -29,15 +36,16 @@ import com.compasso.assembly.model.Issue;
 import com.compasso.assembly.model.Person;
 import com.compasso.assembly.repository.AssemblyRepository;
 import com.compasso.assembly.service.AssemblyService;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {AssemblyApplication.class, AssemblyControllerTest.class}, webEnvironment = WebEnvironment.RANDOM_PORT)
 public class AssemblyControllerTest {
 
-	
 	@Autowired
 	private AssemblyRepository assemblyRepository;
 
@@ -46,9 +54,6 @@ public class AssemblyControllerTest {
 
 	@Autowired
 	private TestRestTemplate testRestTemplate;
-	
-	@MockBean
-	private RestTemplate restTemplate;
 	
 	private final static String anyAttribute = "any_attribute";
 	
@@ -104,7 +109,53 @@ public class AssemblyControllerTest {
 		name(UUID.randomUUID().toString()).
 		build();
 	}
-
+	
+	@Before
+	public void before() {
+		assemblyRepository.deleteAll();
+		
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		mapper.registerModule(new Jackson2HalModule());
+		mapper.registerModule(new JavaTimeModule());
+			
+		RestTemplate restTemplate = testRestTemplate.getRestTemplate();
+		for (HttpMessageConverter<?> messageConverter : restTemplate.getMessageConverters()) {
+			if (messageConverter instanceof MappingJackson2HttpMessageConverter) {
+				MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter
+						= (MappingJackson2HttpMessageConverter) messageConverter;
+				mappingJackson2HttpMessageConverter.setObjectMapper(mapper);
+				mappingJackson2HttpMessageConverter.setSupportedMediaTypes(MediaType.parseMediaTypes("application/hal+json"));
+			}
+		}
+		
+	}
+	
+	@Test
+	public void getAllByStatus() throws Exception {
+		final Assembly entity = createSimpleAssembly();
+		final Assembly entity2 = createSimpleAssembly();
+		final Assembly entity3 = createSimpleAssembly();
+		entity3.setStatusObject(StatusObject.DESACTIVATE);
+		assemblyRepository.saveAll(Arrays.asList(entity, entity2, entity3));
+		final ResponseEntity<Resources<Resource<Assembly>>> response = testRestTemplate.exchange("/assembly/status/{status}", HttpMethod.GET, null,  new ParameterizedTypeReference<Resources<Resource<Assembly>>>() {}, StatusObject.ACTIVE);
+		assertThat(response.getBody().getContent().size()).isEqualTo(2);
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+	}
+	
+	@Test
+	public void getAll() throws Exception {
+		final Assembly entity = createSimpleAssembly();
+		final Assembly entity2 = createSimpleAssembly();
+		final Assembly entity3 = createSimpleAssembly();
+		
+		entity3.setStatusObject(StatusObject.DESACTIVATE);
+		assemblyRepository.saveAll(Arrays.asList(entity, entity2, entity3));
+		final ResponseEntity<Resources<Resource<Assembly>>> response = testRestTemplate.exchange("/assembly/", HttpMethod.GET, null,  new ParameterizedTypeReference<Resources<Resource<Assembly>>>() {}, StatusObject.ACTIVE);
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(response.getBody().getContent().size()).isEqualTo(3);
+		
+	}
 	
 	@Test
 	public void getOne() throws Exception {

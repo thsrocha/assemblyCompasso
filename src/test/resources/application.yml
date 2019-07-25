@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: merchant-microservice
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/merchant-microservice
+      
+security:
+  basic:
+    enabled: true
+    
+microservice:
+  enrichment-ms:
+    protocol: ${service.enrichment-ms.protocol:http}
+    hostname: ${service.enrichment-ms.hostname:localhost}
+    port: ${service.enrichment-ms.port:33009}
+    path: ${service.enrichment-ms.uri:enrichment}
+  domain-ms:
+    protocol: ${service.domain-ms.protocol:https}
+    hostname: ${service.domain-ms.hostname:api-hg.getnet.com.br}
+    port: ${service.domain-ms.port:8443}
+    path: ${service.domain-ms.uri:v1/domains/mccs}  

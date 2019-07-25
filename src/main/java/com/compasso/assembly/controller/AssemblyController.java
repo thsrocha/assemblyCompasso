@@ -46,21 +46,24 @@ public class AssemblyController {
 	}
 
 	@GetMapping(value = "/status/{status}")
-	public Resources<Resource<Assembly>> getByStatus(@PathVariable("status") @Valid StatusObject status) {
-		List<Resource<Assembly>> assemblies = service.findAll().stream()
+	public ResponseEntity<Resources<Resource<Assembly>>> getByStatus(@PathVariable("status") @Valid StatusObject status) {
+		List<Resource<Assembly>> assemblies = service.getAllAssemblyByStatus(status).stream()
 				.map(assembly -> new Resource<>(assembly,
 						ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(AssemblyController.class).getAssemblyById(assembly.getId())).withSelfRel(),
 						ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(AssemblyController.class).getAll()).withRel("assemblies")))
 				.collect(Collectors.toList());
 
-		return new Resources<>(assemblies, ControllerLinkBuilder
-				.linkTo(ControllerLinkBuilder.methodOn(AssemblyController.class).getAll()).withSelfRel());
+		return new ResponseEntity<>(
+				new Resources<>(assemblies, ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(AssemblyController.class).getAll()).withSelfRel()), 
+				HttpStatus.OK);
 	}
 
-	@GetMapping
+	@GetMapping(path = "/")
 	public ResponseEntity<Resources<Resource<Assembly>>> getAll() {
+		
+		
 		List<Resource<Assembly>> assemblies = service.findAll().stream()
-				.map(assembly -> new Resource<>(assembly,
+				.map(assembly -> new Resource<Assembly>(assembly,
 						ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(AssemblyController.class).getAssemblyById(assembly.getId())).withSelfRel(),
 						ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(AssemblyController.class).getAll()).withRel("assemblies")))
 				.collect(Collectors.toList());
@@ -72,9 +75,9 @@ public class AssemblyController {
 	}
 
 	@GetMapping(value = "/{id}")
-	public ResponseEntity<Resource<Assembly>> getAssemblyById(@PathVariable("id") String id) {
+	public ResponseEntity<Resource<Assembly>> getAssemblyById(@PathVariable("id") @Valid String id) {
 
-		if(StringUtils.isEmpty(id)) {
+		if(StringUtils.isEmpty(StringUtils.trimAllWhitespace(id))) {
 			throw new BadRequestException(HttpStatus.BAD_REQUEST.toString());
 		}
 		
