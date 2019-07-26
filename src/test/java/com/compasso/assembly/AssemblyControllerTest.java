@@ -154,7 +154,6 @@ public class AssemblyControllerTest {
 		final ResponseEntity<Resources<Resource<Assembly>>> response = testRestTemplate.exchange("/assembly/", HttpMethod.GET, null,  new ParameterizedTypeReference<Resources<Resource<Assembly>>>() {}, StatusObject.ACTIVE);
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(response.getBody().getContent().size()).isEqualTo(3);
-		
 	}
 	
 	@Test

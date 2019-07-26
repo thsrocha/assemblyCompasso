@@ -1,0 +1,24 @@
+server:
+  port: ${port:33005}
+
+spring:
+  application:
+    name: ${name:assembly-ms}
+  profiles:
+    active: ${profiles.active:local}
+  data:
+    mongodb:
+      uri: ${mongodb.uri:mongodb://localhost:27017/assembly-ms}
+  cloud:
+    consul:
+      host: ${consul.host:localhost}
+      port: ${consul.port:8500}
+      config:
+        enabled: true
+        prefix: ${consul.config.prefix:config}
+        defaultContext: apps
+        profileSeparator: '::'
+        
+management:
+  security:
+    enabled: false
