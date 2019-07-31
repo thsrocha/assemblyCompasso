@@ -121,18 +121,17 @@
 				</configuration>
 			</plugin>
 
-			<!-- <plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
 				<configuration>
 					<archive>
 						<manifest>
-							<addClasspath>true</addClasspath>
 							<mainClass>com.compasso.assembly.AssemblyApplication</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
-			</plugin> -->
+			</plugin>
 		</plugins>
 	</build>
 
